@@ -1,0 +1,15 @@
+﻿@model List<ApplicationCore.Models.ProductResponseModel>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div>
+    @foreach (var product in Model)
+    {
+        <div>
+            <h3>@product.Title</h3>
+            <img src="@product.PosterUrl" />
+        </div>
+    }
+</div>
+ 
