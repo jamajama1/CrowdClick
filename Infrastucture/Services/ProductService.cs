@@ -1,4 +1,6 @@
 ﻿using ApplicationCore.Models;
+using ApplicationCore.RepositoryInterfaces;
+using ApplicationCore.ServiceInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,19 +9,42 @@ using System.Threading.Tasks;
 
 namespace Infrastucture.Services
 {
-    public class ProductService
+    public class ProductService: IProductService
     {
-        public List<ProductResponseModel> GetProducts()
-        {
-            //call product repos and get products
+        private readonly IProductRepository _productRepository;
 
-            var products = new List<ProductResponseModel> { 
-                new ProductResponseModel { Id=1, Title="TestProduct1", PosterUrl="https://sc04.alicdn.com/kf/H2a94aea1f4c44d918e6b8163a52a7026J.jpg" },
-                new ProductResponseModel { Id=2, Title="TestProduct2", PosterUrl="https://sc04.alicdn.com/kf/H3acb6b4f84af48118d4c2ccbf95477d6Z.jpg" },
-                new ProductResponseModel { Id=3, Title="TestProduct3", PosterUrl="https://sc04.alicdn.com/kf/Hbd8d3113f8724c14b8233de6e026eae9e.jpg" }
+        public ProductService(IProductRepository productRepository)
+        {
+            _productRepository = productRepository;
+        }
+
+        public async Task<ProductResponseModel> GetProductByName(string productName, int id, decimal price)
+        {
+            var product = await _productRepository.GetProductByName(productName, id, price);
+
+            var productResponse = new ProductResponseModel 
+            {
+                Name = product.Name,
+                MOQ = product.MinimumOrderQuantity,                
+                PicUrl = product.PicUrl,
+                Price = product.Price
             };
 
-            return products;
+            return productResponse;
+        }
+
+        public async Task<List<ProductResponseModel>> GetProducts()
+        {
+            //call product repos and get products
+            var products = await _productRepository.GetAll();
+            var productsList = products.Select(p=> new ProductResponseModel {  
+                Name = p.Name, 
+                PicUrl = p.PicUrl,
+                MOQ = p.MinimumOrderQuantity,
+                Price = p.Price
+            }).ToList();
+
+            return productsList;
         }
     }
 }

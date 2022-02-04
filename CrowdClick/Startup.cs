@@ -1,6 +1,13 @@
+using ApplicationCore.RepositoryInterfaces;
+using ApplicationCore.ServiceInterfaces;
+using Infrastructure.Repositories;
+using Infrastucture.Data;
+using Infrastucture.Repositories;
+using Infrastucture.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +31,14 @@ namespace CrowdClick
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddScoped<IScraperService, ScraperService>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
+
+
+            services.AddDbContext<CrowdClickDbContext>(
+                options => options.UseSqlServer(Configuration.GetConnectionString("CrowdClickDbConnection"))
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

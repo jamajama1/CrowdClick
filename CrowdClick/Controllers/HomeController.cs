@@ -1,4 +1,5 @@
-﻿using CrowdClick.Models;
+﻿using ApplicationCore.ServiceInterfaces;
+using CrowdClick.Models;
 using Infrastucture.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,16 +13,31 @@ namespace CrowdClick.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IScraperService _scraperService;
+        private readonly IProductService _productService;
 
-        public HomeController()
+        public HomeController(IScraperService scraperService, IProductService productService)
         {
-
+            _scraperService = scraperService;
+            _productService = productService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            ProductService productService = new ProductService();
-            var products = productService.GetProducts();
+
+            //var products = await _productService.GetProductByName("Baby Pink Crop Top ", 1, (decimal)4.99);
+            var url = "https://corner-123.com/bestsellers/";
+            await _scraperService.GetProductDetails(url);
+            // strongly type model to pass in data from controller
+            return View(/*"ProductDetails", products*/);
+        }
+
+        public async Task<IActionResult> ProductDetails()
+        {
+
+            var products = await _productService.GetProductByName("Baby Pink Crop Top ", 1, (decimal)4.99);
+            //var url = "https://corner-123.com/bestsellers/";
+            //await _scraperService.GetProductDetails(url);
             // strongly type model to pass in data from controller
             return View(products);
         }

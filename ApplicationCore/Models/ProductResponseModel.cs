@@ -8,8 +8,11 @@ namespace ApplicationCore.Models
 {
     public class ProductResponseModel
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public String PosterUrl { get; set; }
+        //public int Id { get; set; }
+        public string Name { get; set; }
+        public String PicUrl { get; set; }
+        public decimal Price { get; set; }
+        public int MOQ { get; set; }
+        public string MOQType { get; set; }
     }
 }
