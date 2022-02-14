@@ -14,7 +14,7 @@ namespace ApplicationCore.Entities
         public int MinimumOrderQuantity { get; set; }
         //public string? MinimumOrderQuantityType { get; set; }
         public int MyProperty { get; set; }
-        public decimal? SuggestedPrice { get; set; }
+        public string? SuggestedPrice { get; set; }
         public Decimal Price { get; set; }
         public string ProductUrl { get; set; }
         public string PicUrl { get; set; }

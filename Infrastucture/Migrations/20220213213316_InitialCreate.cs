@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Infrastucture.Migrations
 {
-    public partial class initialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -151,21 +151,24 @@ namespace Infrastucture.Migrations
                 name: "Product",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    VendorId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     MinimumOrderQuantity = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    MyProperty = table.Column<int>(type: "int", nullable: false),
+                    SuggestedPrice = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProductUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PicUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UnitsInStock = table.Column<int>(type: "int", nullable: true),
                     UnitsOnOrder = table.Column<int>(type: "int", nullable: true),
                     Discontinued = table.Column<bool>(type: "bit", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: true),
-                    VendorId = table.Column<int>(type: "int", nullable: false)
+                    CategoryId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Product", x => x.Id);
+                    table.PrimaryKey("PK_Product", x => new { x.Name, x.VendorId, x.Price });
                     table.ForeignKey(
                         name: "FK_Product_Category_CategoryId",
                         column: x => x.CategoryId,
@@ -211,6 +214,51 @@ namespace Infrastucture.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Product_Option",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductName = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                    ProductVendorId = table.Column<int>(type: "int", nullable: false),
+                    ProductPrice = table.Column<decimal>(type: "decimal(5,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Product_Option", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Product_Option_Product_ProductName_ProductVendorId_ProductPrice",
+                        columns: x => new { x.ProductName, x.ProductVendorId, x.ProductPrice },
+                        principalTable: "Product",
+                        principalColumns: new[] { "Name", "VendorId", "Price" },
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Product_Variant",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SKU = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProductName = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                    ProductVendorId = table.Column<int>(type: "int", nullable: false),
+                    ProductPrice = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Product_Variant", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Product_Variant_Product_ProductName_ProductVendorId_ProductPrice",
+                        columns: x => new { x.ProductName, x.ProductVendorId, x.ProductPrice },
+                        principalTable: "Product",
+                        principalColumns: new[] { "Name", "VendorId", "Price" },
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Project",
                 columns: table => new
                 {
@@ -225,16 +273,19 @@ namespace Infrastucture.Migrations
                     Pledges = table.Column<decimal>(type: "decimal(12,2)", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     UserProductId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false)
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductName = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                    ProductVendorId = table.Column<int>(type: "int", nullable: false),
+                    ProductPrice = table.Column<decimal>(type: "decimal(5,2)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Project", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Project_Product_ProductId",
-                        column: x => x.ProductId,
+                        name: "FK_Project_Product_ProductName_ProductVendorId_ProductPrice",
+                        columns: x => new { x.ProductName, x.ProductVendorId, x.ProductPrice },
                         principalTable: "Product",
-                        principalColumn: "Id",
+                        principalColumns: new[] { "Name", "VendorId", "Price" },
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Project_Status_StatusId",
@@ -246,6 +297,26 @@ namespace Infrastucture.Migrations
                         name: "FK_Project_UserProduct_UserProductId",
                         column: x => x.UserProductId,
                         principalTable: "UserProduct",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Variant_Value",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Product_VariantId = table.Column<int>(type: "int", nullable: false),
+                    Product_OptionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Variant_Value", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Variant_Value_Product_Variant_Product_VariantId",
+                        column: x => x.Product_VariantId,
+                        principalTable: "Product_Variant",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -541,6 +612,16 @@ namespace Infrastucture.Migrations
                 column: "VendorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Product_Option_ProductName_ProductVendorId_ProductPrice",
+                table: "Product_Option",
+                columns: new[] { "ProductName", "ProductVendorId", "ProductPrice" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Product_Variant_ProductName_ProductVendorId_ProductPrice",
+                table: "Product_Variant",
+                columns: new[] { "ProductName", "ProductVendorId", "ProductPrice" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProductInvestment_InvestmentOptionId",
                 table: "ProductInvestment",
                 column: "InvestmentOptionId");
@@ -566,9 +647,9 @@ namespace Infrastucture.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Project_ProductId",
+                name: "IX_Project_ProductName_ProductVendorId_ProductPrice",
                 table: "Project",
-                column: "ProductId");
+                columns: new[] { "ProductName", "ProductVendorId", "ProductPrice" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Project_StatusId",
@@ -604,6 +685,11 @@ namespace Infrastucture.Migrations
                 name: "IX_User_CountryId",
                 table: "User",
                 column: "CountryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Variant_Value_Product_VariantId",
+                table: "Variant_Value",
+                column: "Product_VariantId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -621,6 +707,9 @@ namespace Infrastucture.Migrations
                 name: "Parameter");
 
             migrationBuilder.DropTable(
+                name: "Product_Option");
+
+            migrationBuilder.DropTable(
                 name: "ProductTeam");
 
             migrationBuilder.DropTable(
@@ -628,6 +717,9 @@ namespace Infrastucture.Migrations
 
             migrationBuilder.DropTable(
                 name: "Update");
+
+            migrationBuilder.DropTable(
+                name: "Variant_Value");
 
             migrationBuilder.DropTable(
                 name: "ProductInvestment");
@@ -640,6 +732,9 @@ namespace Infrastucture.Migrations
 
             migrationBuilder.DropTable(
                 name: "Role");
+
+            migrationBuilder.DropTable(
+                name: "Product_Variant");
 
             migrationBuilder.DropTable(
                 name: "InvestmentOption");

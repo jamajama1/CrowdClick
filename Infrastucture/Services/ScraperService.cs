@@ -17,6 +17,7 @@ namespace Infrastucture.Services
     public class ScraperService : IScraperService
     {
         private readonly IProductRepository _productRepository;
+        int count = 0;
 
         public ScraperService(IProductRepository productRepository)
         {
@@ -58,10 +59,29 @@ namespace Infrastucture.Services
                 var name = ProductDetails[162].TrimStart(' ');
 
                 var price = Convert.ToDecimal(RemoveWhitespace(ProductDetails[266]).TrimStart('$'));
-                var recommended = Convert.ToDecimal(RemoveWhitespace(ProductDetails[268]).TrimStart('$'));
+                //FIX PROBLEM WITH $20-$26
+                var recommended = /*Convert.ToDecimal(*/RemoveWhitespace(ProductDetails[268]).TrimStart('$');//);
                 var MOQmetadata = RemoveWhitespace(ProductDetails[270]).Split(new string[] { "pcs" }, StringSplitOptions.None);
                 var MOQtype = MOQmetadata[1].TrimStart('(').TrimEnd(')');
-                var MOQ = Convert.ToInt32(MOQmetadata[0]);
+                count++;
+
+                var MOQ = 0;
+                if (MOQmetadata[0] != "")
+                {
+                    MOQ = Convert.ToInt32(MOQmetadata[0]);
+                }
+                else
+                {
+                    var ParseMOQ = MOQtype.Split(new string[] { "," }, StringSplitOptions.None);
+                    var count = 0;
+                    foreach (var moq in ParseMOQ)
+                    {
+                        var countMOQ = moq.Split(new string[] { "*" }, StringSplitOptions.None);
+                        count += Convert.ToInt32(countMOQ[0]);
+                    }
+
+                    MOQ = count;
+                }
 
                 if (name.Contains("pcs"))
                 {
@@ -95,7 +115,7 @@ namespace Infrastucture.Services
                         
                     };
 
-                    //var e = await _productRepository.Add(product);
+                    var e = await _productRepository.Add(product);
                 }
             }
 

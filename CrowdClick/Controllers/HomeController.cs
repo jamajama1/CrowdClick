@@ -25,11 +25,11 @@ namespace CrowdClick.Controllers
         public async Task<IActionResult> Index()
         {
 
-            //var products = await _productService.GetProductByName("Baby Pink Crop Top ", 1, (decimal)4.99);
+            var products = await _productService.GetProducts();
             var url = "https://corner-123.com/bestsellers/";
-            await _scraperService.GetProductDetails(url);
+            //var products = await _scraperService.GetProductDetails(url);
             // strongly type model to pass in data from controller
-            return View(/*"ProductDetails", products*/);
+            return View(products);
         }
 
         public async Task<IActionResult> ProductDetails()

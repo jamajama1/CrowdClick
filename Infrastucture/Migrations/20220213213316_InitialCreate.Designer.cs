@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastucture.Migrations
 {
     [DbContext(typeof(CrowdClickDbContext))]
-    [Migration("20211126034037_initialCreate")]
-    partial class initialCreate
+    [Migration("20220213213316_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -248,10 +248,15 @@ namespace Infrastucture.Migrations
 
             modelBuilder.Entity("ApplicationCore.Entities.Product", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("Name")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
@@ -263,15 +268,23 @@ namespace Infrastucture.Migrations
                     b.Property<bool>("Discontinued")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.Property<int>("MinimumOrderQuantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int>("MyProperty")
+                        .HasColumnType("int");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(5,2)");
+                    b.Property<string>("PicUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProductUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SuggestedPrice")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("UnitsInStock")
                         .HasColumnType("int");
@@ -279,10 +292,7 @@ namespace Infrastucture.Migrations
                     b.Property<int?>("UnitsOnOrder")
                         .HasColumnType("int");
 
-                    b.Property<int>("VendorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("Name", "VendorId", "Price");
 
                     b.HasIndex("CategoryId");
 
@@ -350,6 +360,63 @@ namespace Infrastucture.Migrations
                     b.ToTable("ProductTeam");
                 });
 
+            modelBuilder.Entity("ApplicationCore.Entities.Product_Option", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("ProductPrice")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("ProductVendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductName", "ProductVendorId", "ProductPrice");
+
+                    b.ToTable("Product_Option");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Entities.Product_Variant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("ProductPrice")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("ProductVendorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SKU")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductName", "ProductVendorId", "ProductPrice");
+
+                    b.ToTable("Product_Variant");
+                });
+
             modelBuilder.Entity("ApplicationCore.Entities.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -379,6 +446,16 @@ namespace Infrastucture.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("ProductPrice")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("ProductVendorId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("StartTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -392,11 +469,11 @@ namespace Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
-
                     b.HasIndex("StatusId");
 
                     b.HasIndex("UserProductId");
+
+                    b.HasIndex("ProductName", "ProductVendorId", "ProductPrice");
 
                     b.ToTable("Project");
                 });
@@ -572,6 +649,26 @@ namespace Infrastucture.Migrations
                     b.ToTable("UserProduct");
                 });
 
+            modelBuilder.Entity("ApplicationCore.Entities.Variant_Value", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Product_OptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Product_VariantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Product_VariantId");
+
+                    b.ToTable("Variant_Value");
+                });
+
             modelBuilder.Entity("ApplicationCore.Entities.Vendor", b =>
                 {
                     b.Property<int>("Id")
@@ -741,14 +838,30 @@ namespace Infrastucture.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("ApplicationCore.Entities.Project", b =>
+            modelBuilder.Entity("ApplicationCore.Entities.Product_Option", b =>
                 {
                     b.HasOne("ApplicationCore.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
+                        .WithMany("Product_Options")
+                        .HasForeignKey("ProductName", "ProductVendorId", "ProductPrice")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Entities.Product_Variant", b =>
+                {
+                    b.HasOne("ApplicationCore.Entities.Product", "Product")
+                        .WithMany("Product_Variants")
+                        .HasForeignKey("ProductName", "ProductVendorId", "ProductPrice")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Entities.Project", b =>
+                {
                     b.HasOne("ApplicationCore.Entities.Status", "Status")
                         .WithMany("Products")
                         .HasForeignKey("StatusId")
@@ -758,6 +871,12 @@ namespace Infrastucture.Migrations
                     b.HasOne("ApplicationCore.Entities.UserProduct", "UserProduct")
                         .WithMany("Products")
                         .HasForeignKey("UserProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ApplicationCore.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductName", "ProductVendorId", "ProductPrice")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -813,6 +932,15 @@ namespace Infrastucture.Migrations
                     b.Navigation("Country");
                 });
 
+            modelBuilder.Entity("ApplicationCore.Entities.Variant_Value", b =>
+                {
+                    b.HasOne("ApplicationCore.Entities.Product_Variant", null)
+                        .WithMany("Variant_Values")
+                        .HasForeignKey("Product_VariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ApplicationCore.Entities.Country", b =>
                 {
                     b.Navigation("Users");
@@ -833,9 +961,21 @@ namespace Infrastucture.Migrations
                     b.Navigation("ProductTeams");
                 });
 
+            modelBuilder.Entity("ApplicationCore.Entities.Product", b =>
+                {
+                    b.Navigation("Product_Options");
+
+                    b.Navigation("Product_Variants");
+                });
+
             modelBuilder.Entity("ApplicationCore.Entities.ProductInvestment", b =>
                 {
                     b.Navigation("Investors");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Entities.Product_Variant", b =>
+                {
+                    b.Navigation("Variant_Values");
                 });
 
             modelBuilder.Entity("ApplicationCore.Entities.Project", b =>
